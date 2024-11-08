@@ -1,18 +1,40 @@
-import java.math.BigDecimal;
-import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 public class ConnectDb {
+    private static final String URL = "jdbc:postgresql://localhost:5432/retail";
+    private static final String USER = "ais";
+    private static final String PASSWORD = "mysecretpassword";
 
     public static void main(String[] args) throws SQLException {
-        String url = "jdbc:postgresql://localhost:5432/retail";
-        String user = "ais";
-        String password = "mysecretpassword";
+        insertProduct();
+        getAllProducts();
+    }
 
-        try (var connection = DriverManager.getConnection(url, user, password);) {
+    private static void insertProduct() throws SQLException {
+        String name = "AMD Atlon 33333";
+        Integer price = 20;
+        String category = "Processor";
+        Integer stock = 2;
+        //String sql = String.format("insert into product (name, price, category, stock) values ('%s', %d, '%s', %d)", name, price, category, stock);
+        String sql = "insert into product (name, price, category, stock) values (?, ?, ?, ?)";
+        try (var connection = DriverManager.getConnection(URL, USER, PASSWORD);) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, name);
+            statement.setInt(2, price);
+            statement.setString(3, category);
+            statement.setInt(4, stock);
+
+            var result = statement.executeUpdate();
+            System.out.println(result);
+        }
+    }
+
+    private static void getAllProducts() throws SQLException {
+        try (var connection = DriverManager.getConnection(URL, USER, PASSWORD);) {
             System.out.println("Connected to database");
 
             Statement statement = connection.createStatement();
